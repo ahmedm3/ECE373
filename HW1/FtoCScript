@@ -1,0 +1,11 @@
+Script started on Thu Apr  7 00:26:20 2016
+bash-3.2$ gcc -g -o FarToCel FtoC.c 
+bash-3.2$ ./FarToCel 32
+Celcius value = 0.00
+bash-3.2$ ./FarToCel 212
+Celcius value = 100.00
+bash-3.2$ ./FarToCel 72
+Celcius value = 22.22
+bash-3.2$ exit
+
+Script done on Thu Apr  7 00:27:07 2016
