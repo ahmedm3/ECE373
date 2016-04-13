@@ -1,12 +1,13 @@
 // Ahmed Abdulkareem
 // ECE 373
 // 04/10/2016
-// Register character device
+// Hooking up our char driver
 
 #include <linux/module.h>
 #include <linux/types.h>
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
+#include <linux/cdev.h>
 
 #define DEVCNT 1
 static dev_t cdev_node;
