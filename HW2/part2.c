@@ -28,10 +28,34 @@ static struct file_operations mydev_fops = {
 };
 
 
-static ssize_t cdev2_read(struct file *file, char __user *user, size_t size, loff_t *loff)
+static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_t *offset)
 {
 	printk(KERN_INFO "Read function\n");
-	return 0;
+
+	// local kernel buffer
+	int ret;
+
+	if (*offset >= sizeof(int))
+		return 0;
+
+	// if user is bad
+	if (!buf) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	if (copy_to_user(buf, &mydev.syscall_val, sizeof(int))) {
+		ret = -EFAULT;
+		goto out;
+	}
+	ret = sizeof(int);
+	*offset += len;
+
+	/* Good to go, so printk the thingy */
+	printk(KERN_INFO "User got from us: %d\n", mydev.sys_int);
+
+out:
+	return ret;
 }
 
 int __init cdev2_init(void)
