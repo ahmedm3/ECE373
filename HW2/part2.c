@@ -8,12 +8,16 @@
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
+#include <linux/usb.h>
+#include <linux/slab.h>
+
 
 #define DEVCNT 1
 #define DEVNAME "cdev2"
 
 // function prototypes
-static ssize_t cdev2_read(struct file *file, char __user *user, size_t size, loff_t *loff);
+static ssize_t cdev2_read(struct file *, char __user *, size_t, loff_t *);
+static ssize_t cdev2_write(struct file *, const char __user *, size_t, loff_t *);
 
 static struct mydev_dev {
 	struct cdev cdev;
@@ -25,16 +29,18 @@ static struct mydev_dev {
 static struct file_operations mydev_fops = {
 	.owner = THIS_MODULE,
 	.read = cdev2_read,
+	.write = cdev2_write,
 };
 
 
 static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_t *offset)
 {
-	printk(KERN_INFO "Read function\n");
 
 	// local kernel buffer
 	int ret;
 
+	printk(KERN_INFO "Read function\n");
+	
 	if (*offset >= sizeof(int))
 		return 0;
 
@@ -48,15 +54,57 @@ static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_
 		ret = -EFAULT;
 		goto out;
 	}
-	ret = sizeof(int);
+	ret = mydev.syscall_val;
 	*offset += len;
 
-	/* Good to go, so printk the thingy */
-	printk(KERN_INFO "User got from us: %d\n", mydev.sys_int);
+	printk(KERN_INFO "User got from us: %d\n", mydev.syscall_val);
 
 out:
 	return ret;
 }
+
+static ssize_t cdev2_write(struct file *file, const char __user *buf, size_t len, loff_t *offset)
+{
+
+	// Have local kernel memory 
+	char *kern_buf;
+	int ret;
+
+	printk(KERN_INFO "Inside write function!\n");
+	
+	// make sure user isn't bad
+	if (!buf) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	// get some mem
+	kern_buf = kmalloc(len, GFP_KERNEL);
+
+	// make sure mem is good to go
+	if (!kern_buf) {
+		ret = -ENOMEM;
+		goto out;
+	}
+
+	// copy from user 
+	if (copy_from_user(kern_buf, buf, len)) {
+		ret = -EFAULT;
+		goto mem_out;
+	}
+
+	ret = *kern_buf;
+
+	// print whatever userspace gives us
+	printk(KERN_INFO "Userspace wrote \"%s\" to us\n", kern_buf);
+
+mem_out:
+	kfree(kern_buf);
+out:
+	return ret;
+
+}
+
 
 int __init cdev2_init(void)
 {
