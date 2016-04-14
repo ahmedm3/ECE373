@@ -93,7 +93,8 @@ static ssize_t cdev2_write(struct file *file, const char __user *buf, size_t len
 		goto mem_out;
 	}
 
-	ret = *kern_buf;
+	ret = len;
+	mydev.syscall_val = *kern_buf;
 
 	// print whatever userspace gives us
 	printk(KERN_INFO "Userspace wrote \"%s\" to us\n", kern_buf);
