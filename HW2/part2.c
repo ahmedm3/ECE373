@@ -10,6 +10,7 @@
 #include <linux/cdev.h>
 #include <linux/usb.h>
 #include <linux/slab.h>
+//#include <linux/kernel.h>
 
 
 #define DEVCNT 1
@@ -49,12 +50,14 @@ static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_
 		ret = -EINVAL;
 		goto out;
 	}
-
+	
 	if (copy_to_user(buf, &mydev.syscall_val, sizeof(int))) {
 		ret = -EFAULT;
 		goto out;
 	}
-	ret = mydev.syscall_val;
+
+	printk(KERN_INFO "buf: %s\n", str);
+	ret = sizeof(int);
 	*offset += len;
 
 	printk(KERN_INFO "User got from us: %d\n", mydev.syscall_val);
@@ -69,6 +72,7 @@ static ssize_t cdev2_write(struct file *file, const char __user *buf, size_t len
 	// Have local kernel memory 
 	char *kern_buf;
 	int ret;
+	long int_val;
 
 	printk(KERN_INFO "Inside write function!\n");
 	
@@ -93,8 +97,11 @@ static ssize_t cdev2_write(struct file *file, const char __user *buf, size_t len
 		goto mem_out;
 	}
 
+	if(kstrtol(kern_buf, 10, &int_val)) {
+		goto out;
+	}
 	ret = len;
-	mydev.syscall_val = *kern_buf;
+	mydev.syscall_val = int_val;
 
 	// print whatever userspace gives us
 	printk(KERN_INFO "Userspace wrote \"%s\" to us\n", kern_buf);
@@ -116,16 +123,19 @@ int __init cdev2_init(void)
 		return -1;
 	}
 
-	printk(KERN_INFO "Allocated %d device(s) at major: %d\n", DEVCNT,
-	       MAJOR(mydev.cdev2_node));
+	printk(KERN_INFO "Allocated %d device(s) at (major, minor): (%d, %d)\n", DEVCNT,
+	       MAJOR(mydev.cdev2_node), MINOR(mydev.cdev2_node));
 
 	/* Initialize the character device and add it to the kernel */
 	cdev_init(&mydev.cdev, &mydev_fops);
 	mydev.cdev.owner = THIS_MODULE;
 
+	// initialize the int value
+	mydev.syscall_val = 25;
+
 	if (cdev_add(&mydev.cdev, mydev.cdev2_node, DEVCNT)) {
 		printk(KERN_ERR "cdev_add() failed!\n");
-		/* clean up chrdev allocation */
+		// clean up chrdev 
 		unregister_chrdev_region(mydev.cdev2_node, DEVCNT);
 
 		return -1;
