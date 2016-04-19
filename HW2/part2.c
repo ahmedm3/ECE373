@@ -19,6 +19,7 @@
 // function prototypes
 static ssize_t cdev2_read(struct file *, char __user *, size_t, loff_t *);
 static ssize_t cdev2_write(struct file *, const char __user *, size_t, loff_t *);
+static int cdev2_open(struct inode *inode, struct file *file);
 
 static struct mydev_dev {
 	struct cdev cdev;
@@ -31,7 +32,17 @@ static struct file_operations mydev_fops = {
 	.owner = THIS_MODULE,
 	.read = cdev2_read,
 	.write = cdev2_write,
+	.open = cdev2_open,
 };
+
+
+static int cdev2_open(struct inode *inode, struct file *file)
+{
+	printk(KERN_INFO "opened!\n");
+	mydev.syscall_val = 25;
+
+	return 0;
+}
 
 
 static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_t *offset)
@@ -40,7 +51,7 @@ static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_
 	// local kernel buffer
 	int ret;
 
-	printk(KERN_INFO "Read function\n");
+	printk(KERN_INFO "Read function, current int is: %d\n", mydev.syscall_val);
 	
 	if (*offset >= sizeof(int))
 		return 0;
@@ -56,7 +67,7 @@ static ssize_t cdev2_read(struct file *file, char __user *buf, size_t len, loff_
 		goto out;
 	}
 
-	printk(KERN_INFO "buf: %s\n", str);
+	printk(KERN_INFO "buf: %d\n", *buf);
 	ret = sizeof(int);
 	*offset += len;
 
@@ -100,9 +111,10 @@ static ssize_t cdev2_write(struct file *file, const char __user *buf, size_t len
 	if(kstrtol(kern_buf, 10, &int_val)) {
 		goto out;
 	}
+	printk(KERN_INFO "int_Val: %d!\n", int_val);
 	ret = len;
 	mydev.syscall_val = int_val;
-
+	printk(KERN_INFO "sysintl: %d!\n", mydev.syscall_val);
 	// print whatever userspace gives us
 	printk(KERN_INFO "Userspace wrote \"%s\" to us\n", kern_buf);
 
