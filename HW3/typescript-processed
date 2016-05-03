@@ -1,0 +1,16 @@
+Script started on Mon 02 May 2016 06:30:06 PM PDT
+root@ece373:/home/linux# ./foo ^H^H^H^H^H^Hgcc foo.c -o foo^H^H^H^H^H^H^H^H^H^H^^
+H^H^H^H^H^Hecho -n "0000:03:00.0" > /sys/module/e1000e/drivers/pci\^M\:e1000e/unn
+bind^H^H^H^H^H^[[Pbind^H^H^H^H^H^[[Pbind^H^H^H^H^M
+root@ece373:/home/linux# echo -n "0000:03:00.0" > /sys/module/e1000e/drivers/pcii
+\^M\:e1000e/bind^H^H^H^Hubind^H^H^H^Hnbind^H^H^H^H^M
+root@ece373:/home/linux# insmod HW3.ko ^M
+root@ece373:/home/linux# gcc foo^G.c -o foo^M
+root@ece373:/home/linux# ./foo ^M
+current value of the LED reg is 0x078406, (4 bytes)^M
+successfully wrote 78 (10 bytes) to the LED reg to turn LED on^M
+Value of the LED reg after being written is 0x0068, (4 bytes)^M
+successfully wrote 15 (10 bytes) to the LED reg to turn LED off^M
+root@ece373:/home/linux# exit^M
+
+Script done on Mon 02 May 2016 06:30:56 PM PDT
