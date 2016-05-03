@@ -40,7 +40,7 @@ static char *pe_driver_name = "Realtek_poker";
 
 static DEFINE_PCI_DEVICE_TABLE(pe_pci_tbl) = {
         { PCI_DEVICE(VENDOR_ID, DEVICE_ID) },
-        { }, /* must have an empty entry at the end! */
+        { }, // must be empty
 };
 
 static int pe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
@@ -53,10 +53,10 @@ static int pe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
         if (err)
                 return err;
 
-        /* set up for high or low dma */
+        // high or low dma 
         err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(64));
         if (err) {
-                dev_err(&pdev->dev, "DMA configuration failed: 0x%x\n", err);
+                dev_err(&pdev->dev, "DMA config failed: 0x%x\n", err);
                 goto err_dma;
         }
 
@@ -78,8 +78,8 @@ static int pe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
         pe->pdev = pdev;
         pci_set_drvdata(pdev, pe);
 
-        /* map device memory */
-        ioremap_len = min_t(int, pci_resource_len(pdev, 0), 4096); //select BAR0
+        // map device memory 
+        ioremap_len = min_t(int, pci_resource_len(pdev, 0), 4096); 
         pe->hw_addr = ioremap(pci_resource_start(pdev, 0), ioremap_len);
         if (!pe->hw_addr) {
                 err = -EIO;
@@ -138,7 +138,6 @@ static ssize_t part3_read(struct file *file, char __user *buf,
 {
 	/* Get a local kernel buffer set aside */
 	int ret;
-//	u32 led_reg;
 
 	if (*offset >= sizeof(int))
 		return 0;
@@ -222,7 +221,6 @@ static int __init part3_init(void)
 
         printk(KERN_INFO "%s loaded\n", pe_driver.name);
         ret = pci_register_driver(&pe_driver);
-       // return ret;
 
 	printk(KERN_INFO "HW3 module loading... \n");
 
@@ -234,13 +232,13 @@ static int __init part3_init(void)
 	printk(KERN_INFO "Allocated %d devices at major: %d\n", DEVCNT,
 	       MAJOR(mydev.mydev_node));
 
-	/* Initialize the character device and add it to the kernel */
+	// Initialize the character device and add it to the kernel 
 	cdev_init(&mydev.cdev, &mydev_fops);
 	mydev.cdev.owner = THIS_MODULE;
 
 	if (cdev_add(&mydev.cdev, mydev.mydev_node, DEVCNT)) {
 		printk(KERN_ERR "cdev_add() failed!\n");
-		/* clean up chrdev allocation */
+		// clean up chrdev allocation 
 		unregister_chrdev_region(mydev.mydev_node, DEVCNT);
 
 		return -1;
@@ -254,10 +252,10 @@ static void __exit part3_exit(void)
 	pci_unregister_driver(&pe_driver);
         printk(KERN_INFO "%s unloaded\n", pe_driver.name);
 
-	/* destroy the cdev */
+	// destroy the cdev 
 	cdev_del(&mydev.cdev);
 
-	/* clean up the devices */
+	// clean up devices
 	unregister_chrdev_region(mydev.mydev_node, DEVCNT);
 
 	printk(KERN_INFO "HW3 module unloaded!\n");
