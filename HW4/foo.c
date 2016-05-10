@@ -19,7 +19,7 @@ int main()
 	ssize_t num_read, num_written;
 	unsigned int  my_read_str;
 	const char my_write_str[10] = "78";
-	const char led_of[10] = "15";
+	const char LED_REG_OFF[10] = "15";
 
 	fd = open("/dev/part4", O_RDWR); //open char device
 
@@ -35,8 +35,8 @@ int main()
 
 	sleep(2);
 
-	num_written = write(fd, led_of, sizeof(led_of));
-	printf("successfully wrote %s (%zd bytes) to the LED reg to turn LED off\n",led_of, num_written);	
+	num_written = write(fd, LED_REG_OFF, sizeof(LED_REG_OFF));
+	printf("successfully wrote %s (%zd bytes) to the LED reg to turn LED off\n",LED_REG_OFF, num_written);	
 	
 	close(fd); 
 
