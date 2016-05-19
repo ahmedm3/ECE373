@@ -21,7 +21,7 @@ int main()
 	const char my_write_str[10] = "78";
 	const char LED_REG_OFF[10] = "15";
 
-	fd = open("/dev/part4", O_RDWR); //open char device
+	fd = open("/dev/ece_led", O_RDWR); //open char device
 
 	num_read = read(fd, &my_read_str, 0); //read 
 	printf("current value of the LED reg is 0x%06x, (%zd bytes)\n",
