@@ -37,7 +37,7 @@ ECE LED Driver
 #define IRQ_REG_TX  0x0001
 #define IRQ_REG_LSC 0x0005
 
-// Define Receive Register
+// Define Receive Reg
 #define RCTL 0x00100 
 #define IRQ_REG_RXQ 0x100000
 #define RDLEN 0x2808
@@ -117,12 +117,12 @@ struct pes {
 
 static void irq_work(struct work_struct *work)
 {
-	printk(KERN_INFO "IN WORK QUEUE !!!!!\n");
-	printk(KERN_INFO "Start and sleep 0.5 seconds \n"); 
+	printk(KERN_INFO "In work queue :)\n");
+	printk(KERN_INFO "Start and sleep 0.5 secs \n"); 
 	msleep(500);
-	printk(KERN_INFO "Turn off both green LED");
+	printk(KERN_INFO "Turn off both green LEDs");
 	writel(0x0F0F0F, mydev.hw_addr + PE_REG_LEDS);
-	printk(KERN_INFO "Task is doing ! \n");
+	printk(KERN_INFO "Task is processing!!!!!! \n");
 }
 
 
@@ -132,15 +132,15 @@ static irqreturn_t pe_irq(int irq,void *data)
 	int i;
 	u32 status;
 
-// Turn on both Green LED when go to interrupt handler
-	printk(KERN_INFO "Got an interrupt! \n");
+        // Turn on both Green LED when go to interrupt handler
+	printk(KERN_INFO "Received interrupttttt yay\n");
 	writel(0x4E4E0F,mydev.hw_addr + PE_REG_LEDS);
 	writel(0x100000,mydev.hw_addr + IMS);
 	status = readl(mydev.hw_addr+ICR);
 	status = status & 0x00FFFFFF; 
-	printk(KERN_INFO "Status value: 0x%x \n",status);
+	printk(KERN_INFO "Status: 0x%x \n",status);
 	for(i=0;i<16;i++)
-	printk(KERN_INFO "Data: 0x%x    DD bit: 0x%x\n",
+	printk(KERN_INFO "Data: 0x%x    DD-bit: 0x%x\n",
 	mydev.cpu_addr[i].upper.data,mydev.cpu_addr[i].upper.field.status &0x1);
 	
 	if(mydev.tail==15)
@@ -188,7 +188,7 @@ static void timer_cb(unsigned long flag)
 	{	
 		flag=0;
 		mydev.syscall_val = 0x7840E;
-		printk(KERN_ERR "LED is off: %x, flag : %lu\n",mydev.syscall_val,flag);
+		printk(KERN_ERR "LED is off :( -> %x, flag : %lu\n",mydev.syscall_val,flag);
 		writeb(mydev.syscall_val,(mydev.hw_addr + PE_REG_LEDS));
 		mod_timer(&my_time,HZ/blink_rate + jiffies);
 	}
@@ -196,7 +196,7 @@ static void timer_cb(unsigned long flag)
 	{	
 		flag=1;
 		mydev.syscall_val = 0x7844E;
-		printk(KERN_ERR "LED is on : %x, flag : %lu\n",mydev.syscall_val,flag);
+		printk(KERN_ERR "LED is on :) ->%x, flag : %lu\n",mydev.syscall_val,flag);
 		writeb(mydev.syscall_val,(mydev.hw_addr+ PE_REG_LEDS));
 		mod_timer(&my_time,HZ/blink_rate + jiffies);
 	}
@@ -258,7 +258,7 @@ static int pe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	mydev.syscall_val = readl(mydev.hw_addr + PE_REG_LEDS);
 	
 	// Display it in Kernel
-	dev_info(&pdev->dev, "led_reg = 0x%02x\n",mydev.syscall_val);
+	dev_info(&pdev->dev, "LED_REG = 0x%02x\n",mydev.syscall_val);
 
 	mydev.cpu_addr= dma_alloc_coherent(&pdev->dev,256,&mydev.addr,GFP_KERNEL);
 	reg = (mydev.addr >> 32) & 0xFFFFFFFF;
@@ -292,13 +292,13 @@ static int pe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	temp = temp | 0x2000;
         writel(temp,mydev.hw_addr + RDLEN);
 
-	printk(KERN_INFO "Ring Descriptor successfully created!  \n");
-	printk(KERN_INFO "INFORMATION ABOUT PHY ADDRESS! \n");
+	printk(KERN_INFO "Ring Descriptor created! :) \n");
+	printk(KERN_INFO "Physical Addr. Info \n");
 	for(i=0;i<16;i++)
-		printk(KERN_INFO " The address is: 0x%x \n",(int)buf_info[i].phy);
+		printk(KERN_INFO "Addr: 0x%x \n",(int)buf_info[i].phy);
 	
 
-	printk(KERN_INFO "Filling descriptor buffer:");
+	printk(KERN_INFO "Filling up descriptor buffer:");
 	for(i=0;i<16;i++)
 	{
 		mydev.cpu_addr[i].buffer_addr= buf_info[i].phy;
@@ -309,7 +309,7 @@ static int pe_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	// Enable receiving
 	temp = readl(mydev.hw_addr + PE_REG_CTRL); // Read
 	temp = temp | 0x40; // Modify
-	printk(KERN_INFO "Receive Enable: 0x%x",temp);
+	printk(KERN_INFO "Enable: 0x%x",temp);
 	writel(temp,mydev.hw_addr + PE_REG_CTRL); // Write
 	temp = readl(mydev.hw_addr + RCTL); // Read
 	temp = temp | 0x10 ; // Modify
@@ -457,7 +457,7 @@ static ssize_t HW6_write(struct file *file, const char __user *buf,
 	ret = len;
 
 	// Print syscall_val's new value
-	printk(KERN_INFO "The new value for blink_rate is: \"%d \n", blink_rate);
+	printk(KERN_INFO "The new value for blink_rate is -> \"%d \n", blink_rate);
 	
 mem_out:
 	kfree(kern_buf);
@@ -476,7 +476,7 @@ static struct file_operations mydev_fops = {
 static int __init HW6_init(void)
 {
 	int ret;
-	printk(KERN_INFO "%s Module is loaded\n", pe_driver.name);
+	printk(KERN_INFO "%s Module loaded\n", pe_driver.name);
 	
 	/* Dynamically allocalte a char driver*/
 	if (alloc_chrdev_region(&mydev_node, 0, DEVCNT, DEVNAME)) {
