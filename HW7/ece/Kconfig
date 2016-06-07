@@ -1,0 +1,8 @@
+config ECE
+	tristate "Ahmed Abdulkareem"
+	depends on PCI
+	help
+	  This driver operates on Intel 82583V GbE Controller, which allocates buffers and
+	  decriptors rings to receive packets, when packets received it turns the green LEDs 
+	  on for 0.5 seconds and then off. 
+
